@@ -12,9 +12,22 @@ TARGET = SignalAnalysis
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-        MainWindow.cpp
+SOURCES +=\
+        MainWindow.cpp \
+    Main.cpp
 
 HEADERS  += MainWindow.h
 
 FORMS    += MainWindow.ui
+
+win32: LIBS += -L$$PWD/../Portaudio/ -lportaudio_x86
+
+INCLUDEPATH += $$PWD/../Portaudio
+DEPENDPATH += $$PWD/../Portaudio
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../release/ -lGuitarSori
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../debug/ -lGuitarSori
+else:unix: LIBS += -L$$PWD/../ -lGuitarSori
+
+INCLUDEPATH += $$PWD/../Debug
+DEPENDPATH += $$PWD/../Debug

@@ -18,7 +18,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GuitarSori.h">
+    <ClInclude Include="..\include\GuitarSori.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

@@ -4,7 +4,7 @@
 #define GUITARSORI_API_EXPORTS
 #include <stdio.h>
 #include <stdlib.h>
-#include "GuitarSori.h"
+#include "../include/GuitarSori.h"
 
 void GuitarSori::PrintSupportedStandardSampleRates(const PaStreamParameters * inputParameters, const PaStreamParameters * outputParameters)
 {
@@ -40,6 +40,19 @@ void GuitarSori::PrintSupportedStandardSampleRates(const PaStreamParameters * in
 		printf("\n");
 }
 
+GuitarSori::GuitarSori() :
+	sampleBlock(NULL),
+	pThread(NULL)
+{
+	isThreadRunning = false;
+}
+
+GuitarSori::~GuitarSori()
+{
+	stopThread();
+	if (sampleBlock) free(sampleBlock);
+}
+
 void GuitarSori::init( const int mFramesPerBuffer, const int mNumChannels, const int mSampleSize, PaSampleFormat mSampleFormat, const double mSampleRate)
 {
 	int numBytes;
@@ -50,9 +63,8 @@ void GuitarSori::init( const int mFramesPerBuffer, const int mNumChannels, const
 	sampleFormat = mSampleFormat;
 	sampleRate = mSampleRate;
 
-	numBytes = framesPerBuffer * numChannels * sampleSize;
-	sampleBlock = (char *)malloc(numBytes);
-
+	numBytes = mFramesPerBuffer * mNumChannels * mSampleSize;
+	if( sampleBlock == NULL ) sampleBlock = (char *)malloc(numBytes);
 	if (sampleBlock == NULL)
 	{
 		printf("Cannot allocate sample block\n");
@@ -87,6 +99,37 @@ void GuitarSori::init( const int mFramesPerBuffer, const int mNumChannels, const
 
 void GuitarSori::runThread()
 {
-	pThread = new std::thread(callback, stream, sampleBlock, framesPerBuffer);
+	if( instance ) pThread = new std::thread(callback, stream, sampleBlock, framesPerBuffer);
+	else return;
 }
 
+MATHFUNCSDLL_API void GuitarSori::stopThread()
+{
+	if (pThread)
+	{
+		isThreadRunning = false;
+		pThread->join();
+	}
+}
+
+void GuitarSori::callback(PaStream * stream, char * sampleBlock, const int framesPerBuffer)
+{
+	isThreadRunning = true;
+	while (isThreadRunning)
+	{
+		Pa_ReadStream(stream, sampleBlock, framesPerBuffer);
+	}
+
+	isThreadRunning = false;
+
+	Pa_Terminate();
+}
+
+GuitarSori* GuitarSori::instance = NULL;
+
+double GuitarSori::standardSampleRates[14] = {
+	8000.0, 9600.0, 11025.0, 12000.0, 16000.0, 22050.0, 24000.0, 32000.0,
+	44100.0, 48000.0, 88200.0, 96000.0, 192000.0, -1
+};
+
+bool GuitarSori::isThreadRunning = false;

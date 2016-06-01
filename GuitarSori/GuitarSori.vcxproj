@@ -151,7 +151,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GuitarSori.h" />
+    <ClInclude Include="..\include\GuitarSori.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GuitarSori.cpp" />

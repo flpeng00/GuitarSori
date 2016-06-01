@@ -1,4 +1,4 @@
-#pragma once
+pragma once
 
 #ifdef __cplusplus
 extern "C"
@@ -45,18 +45,7 @@ public:
 	MATHFUNCSDLL_API static void releaseInstance() { if (instance) delete instance; }
 	MATHFUNCSDLL_API void init(const int framesPerBuffer, const int numChannels, const int sampleSize, PaSampleFormat sampleFormat, const double sampleRate);
 	MATHFUNCSDLL_API void runThread();
-	MATHFUNCSDLL_API static void callback(PaStream *stream, char *sampleBlock, const int framesPerBuffer)
-	{
-		while (1)
-		{
-			Pa_WriteStream(stream, sampleBlock, framesPerBuffer);
-			Pa_ReadStream(stream, sampleBlock, framesPerBuffer);
-		}
-
-		free(sampleBlock);
-
-		Pa_Terminate();
-	}
+	MATHFUNCSDLL_API static void callback(PaStream *stream, char *sampleBlock, const int framesPerBuffer);
 	MATHFUNCSDLL_API void PrintSupportedStandardSampleRates(const PaStreamParameters *inputParameters, const PaStreamParameters *outputParameters);
 };
 

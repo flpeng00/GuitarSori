@@ -16,6 +16,8 @@ public:
     ~MainWindow();
 
 private:
+    int *sampleBuffer;
+    int sampleSizeInByte;
     Ui::MainWindow *ui;
 };
 
