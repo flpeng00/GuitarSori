@@ -152,9 +152,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\GuitarSori.h" />
+    <ClInclude Include="Rvfft.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GuitarSori.cpp" />
+    <ClCompile Include="Rvfft.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

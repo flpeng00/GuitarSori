@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../include/GuitarSori.h"
+#include "Rvfft.h"
 
 void GuitarSori::PrintSupportedStandardSampleRates(const PaStreamParameters * inputParameters, const PaStreamParameters * outputParameters)
 {
@@ -42,6 +43,7 @@ void GuitarSori::PrintSupportedStandardSampleRates(const PaStreamParameters * in
 
 GuitarSori::GuitarSori() :
 	sampleBlock(NULL),
+	sampleBlockConverted(NULL),
 	pThread(NULL)
 {
 	isThreadRunning = false;
@@ -55,7 +57,7 @@ GuitarSori::~GuitarSori()
 
 void GuitarSori::init( const int mFramesPerBuffer, const int mNumChannels, const int mSampleSize, PaSampleFormat mSampleFormat, const double mSampleRate)
 {
-	int numBytes;
+	int numBytes, numBytesConverted;
 
 	framesPerBuffer = mFramesPerBuffer;
 	numChannels = mNumChannels;
@@ -64,7 +66,14 @@ void GuitarSori::init( const int mFramesPerBuffer, const int mNumChannels, const
 	sampleRate = mSampleRate;
 
 	numBytes = mFramesPerBuffer * mNumChannels * mSampleSize;
-	if( sampleBlock == NULL ) sampleBlock = (char *)malloc(numBytes);
+	numBytesConverted = mFramesPerBuffer * mNumChannels * 8;
+
+	if (sampleBlock == NULL)
+	{
+		sampleBlock = (char *)malloc(numBytes);
+		sampleBlockConverted = (double *)malloc(numBytesConverted);
+		sampleBlockFFT = (double *)malloc(numBytesConverted / 2);
+	}
 	if (sampleBlock == NULL)
 	{
 		printf("Cannot allocate sample block\n");
@@ -72,6 +81,8 @@ void GuitarSori::init( const int mFramesPerBuffer, const int mNumChannels, const
 	}
 
 	memset(sampleBlock, 0x00, numBytes);
+	memset(sampleBlockConverted, 0x00, numBytesConverted);
+	memset(sampleBlockFFT, 0x00, numBytesConverted / 2);
 
 	err = Pa_Initialize();
 
@@ -99,7 +110,7 @@ void GuitarSori::init( const int mFramesPerBuffer, const int mNumChannels, const
 
 void GuitarSori::runThread()
 {
-	if( instance ) pThread = new std::thread(callback, stream, sampleBlock, framesPerBuffer);
+	if( instance ) pThread = new std::thread(callback, stream, sampleBlock, sampleBlockConverted, sampleBlockFFT, framesPerBuffer);
 	else return;
 }
 
@@ -112,12 +123,27 @@ MATHFUNCSDLL_API void GuitarSori::stopThread()
 	}
 }
 
-void GuitarSori::callback(PaStream * stream, char * sampleBlock, const int framesPerBuffer)
+void GuitarSori::callback(PaStream *stream, char *sampleBlock, double *sampleBlockConverted, double *sampleBlockFFT, const int framesPerBuffer)
 {
+	float *floatBuffer = (float*)sampleBlock;
 	isThreadRunning = true;
+
 	while (isThreadRunning)
 	{
 		Pa_ReadStream(stream, sampleBlock, framesPerBuffer);
+		for (int i = 0; i < framesPerBuffer * 2; i++)
+		{
+			sampleBlockConverted[i] = (double)floatBuffer[i];
+		}
+
+		
+		realfft_packed(sampleBlockConverted, framesPerBuffer * 2);
+		for (int i = 0; i < framesPerBuffer; i++)
+		{
+			sampleBlockFFT[i] = 50 * (sampleBlockConverted[2 * i] * sampleBlockConverted[2 * i] 
+								+ sampleBlockConverted[2 * i + 1] * sampleBlockConverted[2 * i + 1] );
+		}
+
 	}
 
 	isThreadRunning = false;

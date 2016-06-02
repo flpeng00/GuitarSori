@@ -23,6 +23,8 @@ private:
 	PaStreamParameters inputParameters, outputParameters;
 	PaStream *stream = NULL;
 	char *sampleBlock;
+	double *sampleBlockConverted;
+	double *sampleBlockFFT;
 	int framesPerBuffer;
 	int numChannels;
 	int sampleSize;
@@ -43,7 +45,10 @@ public:
 	MATHFUNCSDLL_API void runThread();
 	MATHFUNCSDLL_API void stopThread();
 	MATHFUNCSDLL_API inline char* getSampleBuffer() { return isThreadRunning ? sampleBlock : NULL; }
+	MATHFUNCSDLL_API inline double* getSampleBufferConverted() { return isThreadRunning ? sampleBlockConverted : NULL; }
+	MATHFUNCSDLL_API inline double* getSampleBufferFFT() { return isThreadRunning ? sampleBlockFFT : NULL; }
 	MATHFUNCSDLL_API inline int getSampleSizeInBytes() { return instance ? framesPerBuffer * numChannels * sampleSize : 0; }
-	MATHFUNCSDLL_API static void callback(PaStream *stream, char *sampleBlock, const int framesPerBuffer);
+	MATHFUNCSDLL_API inline int getConvertedSampleSizeInBytes() { return instance ? framesPerBuffer * numChannels * 8 : 0; }
+	MATHFUNCSDLL_API static void callback(PaStream *stream, char *sampleBlock, double *sampleBlockConverted, double *sampleBlockFFT, const int framesPerBuffer);
 	MATHFUNCSDLL_API void PrintSupportedStandardSampleRates(const PaStreamParameters *inputParameters, const PaStreamParameters *outputParameters);
 };

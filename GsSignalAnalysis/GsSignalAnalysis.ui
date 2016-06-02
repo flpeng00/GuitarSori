@@ -20,7 +20,17 @@
       <x>10</x>
       <y>10</y>
       <width>1091</width>
-      <height>731</height>
+      <height>361</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QCustomPlot" name="fftGraph" native="true">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>380</y>
+      <width>1091</width>
+      <height>361</height>
      </rect>
     </property>
    </widget>

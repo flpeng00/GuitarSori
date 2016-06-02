@@ -26,6 +26,7 @@ class Ui_GsSignalAnalysisClass
 public:
     QWidget *centralWidget;
     QCustomPlot *pwmGraph;
+	QCustomPlot *fftGraph;
     QStatusBar *statusBar;
 
     void setupUi(QMainWindow *GsSignalAnalysisClass)
@@ -37,8 +38,12 @@ public:
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         pwmGraph = new QCustomPlot(centralWidget);
         pwmGraph->setObjectName(QStringLiteral("pwmGraph"));
-        pwmGraph->setGeometry(QRect(10, 10, 1091, 731));
+        pwmGraph->setGeometry(QRect(10, 10, 1091, 361));
 		pwmGraph->addGraph();
+		fftGraph = new QCustomPlot(centralWidget);
+		fftGraph->setObjectName(QStringLiteral("pwmGraph"));
+		fftGraph->setGeometry(QRect(10, 380, 1091, 361));
+		fftGraph->addGraph();
         GsSignalAnalysisClass->setCentralWidget(centralWidget);
         statusBar = new QStatusBar(GsSignalAnalysisClass);
         statusBar->setObjectName(QStringLiteral("statusBar"));

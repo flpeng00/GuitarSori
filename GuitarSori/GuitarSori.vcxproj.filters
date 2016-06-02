@@ -21,9 +21,15 @@
     <ClInclude Include="..\include\GuitarSori.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="Rvfft.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GuitarSori.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Rvfft.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

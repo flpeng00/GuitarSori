@@ -4,7 +4,7 @@
 GsSignalAnalysis::GsSignalAnalysis(QWidget *parent)
 	: QMainWindow(parent)
 {
-	GuitarSori::getInstance()->init(1024, 2, 4, 0x00000004, 44100);
+	GuitarSori::getInstance()->init(2048, 2, 4, paFloat32, 44100);
 	GuitarSori::getInstance()->runThread();
 	ui.setupUi(this);
 
@@ -24,10 +24,11 @@ GsSignalAnalysis::~GsSignalAnalysis()
 
 void GsSignalAnalysis::onTimeOut()
 {
-	char *sampleBuffer;
+	float *sampleBuffer;
+	double *fftBuffer;
 	int sampleSize;
-	sampleBuffer = GuitarSori::getInstance()->getSampleBuffer();
-	sampleSize = GuitarSori::getInstance()->getSampleSizeInBytes() / sizeof(int);
+	sampleBuffer = (float *)GuitarSori::getInstance()->getSampleBuffer();
+	sampleSize = GuitarSori::getInstance()->getSampleSizeInBytes() / 4;
 
 	QVector<double> x(sampleSize), y(sampleSize); // initialize with entries 0..100
 	for (int i = 0; i < sampleSize; i++)
@@ -37,7 +38,20 @@ void GsSignalAnalysis::onTimeOut()
 	}
 
 	ui.pwmGraph->xAxis->setRange(0, sampleSize);
-	ui.pwmGraph->yAxis->setRange(-300, 300);
+	ui.pwmGraph->yAxis->setRange(-1, 1);
 	ui.pwmGraph->graph(0)->setData(x, y);
 	ui.pwmGraph->replot();
+
+	fftBuffer = GuitarSori::getInstance()->getSampleBufferFFT();
+
+	for (int i = 0; i < sampleSize / 2; i++)
+	{
+		x[i] = i;
+		y[i] = fftBuffer[i];
+	}
+
+	ui.fftGraph->xAxis->setRange(0, sampleSize / 2);
+	ui.fftGraph->yAxis->setRange(0, 10);
+	ui.fftGraph->graph(0)->setData(x, y);
+	ui.fftGraph->replot();
 }
