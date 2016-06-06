@@ -4,22 +4,28 @@
 GsSignalAnalysis::GsSignalAnalysis(QWidget *parent)
 	: QMainWindow(parent)
 {
-	GuitarSori::getInstance()->init(2048, 2, 4, paFloat32, 44100);
+	GuitarSori::getInstance()->init(2048, 1, 4, paFloat32, 44100);
 	GuitarSori::getInstance()->runThread();
 	ui.setupUi(this);
 
-	//SignalThread *pThread = new SignalThread();
-	QTimer *timer = new QTimer(this);
+	actionSetup = ui.actionSetting;
+	connect(actionSetup, SIGNAL(triggered()), this, SLOT(showSetupDlg()));
+	timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(onTimeOut()));
 	timer->start(5);
-	//pThread->start();
 }
 
 GsSignalAnalysis::~GsSignalAnalysis()
 {
-	pThread->join();
+	if (timer->isActive()) timer->stop();
 	GuitarSori::getInstance()->stopThread();
 	GuitarSori::releaseInstance();
+}
+
+void GsSignalAnalysis::showSetupDlg()
+{
+	GsSetupDialog *setupDlg = new GsSetupDialog(this);
+	setupDlg->exec();
 }
 
 void GsSignalAnalysis::onTimeOut()

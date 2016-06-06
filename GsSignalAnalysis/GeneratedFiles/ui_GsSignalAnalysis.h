@@ -16,6 +16,7 @@
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QStatusBar>
+#include <QtWidgets/QToolBar>
 #include <QtWidgets/QWidget>
 #include "qcustomplot.h"
 
@@ -26,8 +27,10 @@ class Ui_GsSignalAnalysisClass
 public:
     QWidget *centralWidget;
     QCustomPlot *pwmGraph;
-	QCustomPlot *fftGraph;
+    QCustomPlot *fftGraph;
     QStatusBar *statusBar;
+    QToolBar *toolBar;
+	QAction *actionSetting;
 
     void setupUi(QMainWindow *GsSignalAnalysisClass)
     {
@@ -39,15 +42,23 @@ public:
         pwmGraph = new QCustomPlot(centralWidget);
         pwmGraph->setObjectName(QStringLiteral("pwmGraph"));
         pwmGraph->setGeometry(QRect(10, 10, 1091, 361));
-		pwmGraph->addGraph();
-		fftGraph = new QCustomPlot(centralWidget);
-		fftGraph->setObjectName(QStringLiteral("pwmGraph"));
-		fftGraph->setGeometry(QRect(10, 380, 1091, 361));
-		fftGraph->addGraph();
+        fftGraph = new QCustomPlot(centralWidget);
+        fftGraph->setObjectName(QStringLiteral("fftGraph"));
+        fftGraph->setGeometry(QRect(10, 380, 1091, 361));
         GsSignalAnalysisClass->setCentralWidget(centralWidget);
         statusBar = new QStatusBar(GsSignalAnalysisClass);
         statusBar->setObjectName(QStringLiteral("statusBar"));
         GsSignalAnalysisClass->setStatusBar(statusBar);
+        toolBar = new QToolBar(GsSignalAnalysisClass);
+        toolBar->setObjectName(QStringLiteral("toolBar"));
+        GsSignalAnalysisClass->addToolBar(Qt::TopToolBarArea, toolBar);
+		actionSetting = new QAction(GsSignalAnalysisClass);
+		actionSetting->setObjectName(QStringLiteral("actionSetting"));
+		actionSetting->setText("Setting");
+
+		pwmGraph->addGraph();
+		fftGraph->addGraph();
+		toolBar->addAction(actionSetting);
 
         retranslateUi(GsSignalAnalysisClass);
 
@@ -57,6 +68,7 @@ public:
     void retranslateUi(QMainWindow *GsSignalAnalysisClass)
     {
         GsSignalAnalysisClass->setWindowTitle(QApplication::translate("GsSignalAnalysisClass", "GsSignalAnalysis", 0));
+        toolBar->setWindowTitle(QApplication::translate("GsSignalAnalysisClass", "toolBar", 0));
     } // retranslateUi
 
 };

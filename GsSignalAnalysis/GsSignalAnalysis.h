@@ -3,6 +3,7 @@
 
 #include <QtWidgets/QMainWindow>
 #include "ui_GsSignalAnalysis.h"
+#include "GsSetupDialog.h"
 #include "../include/GuitarSori.h"
 
 class GsSignalAnalysis : public QMainWindow
@@ -13,7 +14,8 @@ private:
 	Ui::GsSignalAnalysisClass ui;
 	int* sampleBuffer;
 	int sampleSizeInByte;
-	std::thread *pThread;
+	QTimer *timer;
+	QAction *actionSetup;
 	static void refrash( LPVOID param );
 
 public:
@@ -22,20 +24,7 @@ public:
 
 public slots:
 	void onTimeOut();
+	void showSetupDlg();
 };
-
-
-/*
-class SignalThread : public QThread
-{
-	Q_OBJECT
-
-public:
-	void run();
-
-signals:
-	void signalReceive(char *sampleBuffer, int sampleSize);
-};
-*/
 
 #endif // GSSIGNALANALYSIS_H

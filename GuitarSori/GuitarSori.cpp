@@ -44,6 +44,7 @@ void GuitarSori::PrintSupportedStandardSampleRates(const PaStreamParameters * in
 GuitarSori::GuitarSori() :
 	sampleBlock(NULL),
 	sampleBlockConverted(NULL),
+	sampleBlockFFT(NULL),
 	pThread(NULL)
 {
 	isThreadRunning = false;
@@ -52,7 +53,26 @@ GuitarSori::GuitarSori() :
 GuitarSori::~GuitarSori()
 {
 	stopThread();
-	if (sampleBlock) free(sampleBlock);
+	freeBuffers();
+}
+
+void GuitarSori::freeBuffers()
+{
+	if (sampleBlock)
+	{
+		free(sampleBlock);
+		sampleBlock = NULL;
+	}
+	if (sampleBlockConverted)
+	{
+		free(sampleBlockConverted);
+		sampleBlockConverted = NULL;
+	}
+	if (sampleBlockFFT)
+	{
+		free(sampleBlockFFT);
+		sampleBlockFFT = NULL;
+	}
 }
 
 void GuitarSori::init( const int mFramesPerBuffer, const int mNumChannels, const int mSampleSize, PaSampleFormat mSampleFormat, const double mSampleRate)
@@ -68,13 +88,12 @@ void GuitarSori::init( const int mFramesPerBuffer, const int mNumChannels, const
 	numBytes = mFramesPerBuffer * mNumChannels * mSampleSize;
 	numBytesConverted = mFramesPerBuffer * mNumChannels * 8;
 
-	if (sampleBlock == NULL)
-	{
-		sampleBlock = (char *)malloc(numBytes);
-		sampleBlockConverted = (double *)malloc(numBytesConverted);
-		sampleBlockFFT = (double *)malloc(numBytesConverted / 2);
-	}
-	if (sampleBlock == NULL)
+	freeBuffers();
+	sampleBlock = (char *)malloc(numBytes);
+	sampleBlockConverted = (double *)malloc(numBytesConverted);
+	sampleBlockFFT = (double *)malloc(numBytesConverted / 2);
+
+	if ( !isBuffersReady() )
 	{
 		printf("Cannot allocate sample block\n");
 		return;
@@ -86,10 +105,14 @@ void GuitarSori::init( const int mFramesPerBuffer, const int mNumChannels, const
 
 	err = Pa_Initialize();
 
+	printf("式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式\n");
 	inputParameters.device = Pa_GetDefaultInputDevice(); /* default input device */
-	printf("Input device # %d.\n", inputParameters.device);
+	inputParameters.device = 1;
+	printf("Input device # %d. : %s\n", inputParameters.device, Pa_GetDeviceInfo(inputParameters.device)->name);
 	printf("Input LL: %g s\n", Pa_GetDeviceInfo(inputParameters.device)->defaultLowInputLatency);
 	printf("Input HL: %g s\n", Pa_GetDeviceInfo(inputParameters.device)->defaultHighInputLatency);
+	printf("Input HL: %g s\n", Pa_GetDeviceInfo(inputParameters.device)->defaultHighInputLatency);
+	printf("Input Channel(MAX.) : %d ", Pa_GetDeviceInfo(inputParameters.device)->maxInputChannels);
 	inputParameters.channelCount = numChannels;
 	inputParameters.sampleFormat = sampleFormat;
 	inputParameters.suggestedLatency = Pa_GetDeviceInfo(inputParameters.device)->defaultHighInputLatency;
@@ -120,6 +143,7 @@ MATHFUNCSDLL_API void GuitarSori::stopThread()
 	{
 		isThreadRunning = false;
 		pThread->join();
+		pThread = NULL;
 	}
 }
 
@@ -131,19 +155,19 @@ void GuitarSori::callback(PaStream *stream, char *sampleBlock, double *sampleBlo
 	while (isThreadRunning)
 	{
 		Pa_ReadStream(stream, sampleBlock, framesPerBuffer);
-		for (int i = 0; i < framesPerBuffer * 2; i++)
+		for (int i = 0; i < framesPerBuffer; i++)
 		{
 			sampleBlockConverted[i] = (double)floatBuffer[i];
 		}
 
 		
-		realfft_packed(sampleBlockConverted, framesPerBuffer * 2);
-		for (int i = 0; i < framesPerBuffer; i++)
+		realfft_packed(sampleBlockConverted, framesPerBuffer);
+		for (int i = 0; i < framesPerBuffer / 2; i++)
 		{
-			sampleBlockFFT[i] = 50 * (sampleBlockConverted[2 * i] * sampleBlockConverted[2 * i] 
+			sampleBlockFFT[i] = 1000 * (sampleBlockConverted[2 * i] * sampleBlockConverted[2 * i] 
 								+ sampleBlockConverted[2 * i + 1] * sampleBlockConverted[2 * i + 1] );
 		}
-
+		Pa_WriteStream(stream, sampleBlock, framesPerBuffer);
 	}
 
 	isThreadRunning = false;

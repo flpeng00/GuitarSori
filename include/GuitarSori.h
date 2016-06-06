@@ -34,9 +34,12 @@ private:
 	std::thread *pThread;
 	MATHFUNCSDLL_API static double standardSampleRates[14];
 	static bool isThreadRunning;
+
 	GuitarSori();
 	~GuitarSori();
 	GuitarSori(const GuitarSori& other);
+	void freeBuffers();
+	inline bool isBuffersReady() { return sampleBlock && sampleBlockConverted && sampleBlockFFT; }
 
 public:
 	MATHFUNCSDLL_API inline static GuitarSori* getInstance() { return instance ? instance : (instance = new GuitarSori()); }
